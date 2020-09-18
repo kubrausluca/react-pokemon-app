@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { getAllPokemon, getPokemon } from './services/pokemon';
-import PokemonList from "./PokemonList";
-import Pagination from './Pagination'
+import PokemonList from "./components/pokemonCard/PokemonList";
+import Navbar from "./components/navbar";
+import Pagination from './components/Pagination'
 import axios from 'axios';
+import './App.css';
 
 function App() {
   const [pokemon, setPokemon] = useState([]);
@@ -21,6 +23,25 @@ function App() {
     }
     fetchData();
   }, [])
+
+  const next = async () => {
+    setLoading(true);
+    let data = await getAllPokemon(nextPageUrl)
+    await loadingPokemon(data.results)
+    setNextPageUrl(data.next);
+    setPrevPageUrl(data.previous)
+    setLoading(false);
+  }
+
+  const prev = async () => {
+    if (!prevPageUrl) return;
+    setLoading(true);
+    let data = await getAllPokemon(prevPageUrl)
+    await loadingPokemon(data.results)
+    setPrevPageUrl(data.previous)
+    setNextPageUrl(data.next);
+    setLoading(false);
+  }
 
   // useEffect(() => {
   //   setLoading(true)
@@ -65,6 +86,13 @@ function App() {
     <div>
       { loading ? <h1>Loading...</h1> : (
         <>
+          <Navbar />
+
+          <div className="btn">
+            <button onClick={prev}>Prev</button>
+            <button onClick={next}>Next</button>
+          </div>
+
           <div className="grid-container">
             {pokemon.map((pokemon, i) => {
               return <PokemonList key={i} pokemon={pokemon} />
